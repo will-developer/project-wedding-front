@@ -13,7 +13,7 @@ function App() {
 
   return (
     <main>
-      <h1>Wedding WebSystem</h1>
+      <h1>Wedding WebSystem!</h1>
       <p>{message}</p>
     </main>
   );
