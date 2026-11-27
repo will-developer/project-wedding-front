@@ -4,7 +4,7 @@ import weddingCrest from '../../assets/guest-access/wedding-crest.svg';
 import styles from './GuestLoginPage.module.css';
 import { GuestLoginForm } from './GuestLoginForm';
 import { loginGuest } from './session.api';
-import { getGuestLoginChallenge, getGuestLoginError } from './guestLoginError';
+import { getGuestLoginChallenge, getGuestLoginError, isGuestLoginRateLimited } from './guestLoginError';
 import type { GuestLoginChallenge } from './guestLoginError';
 import { TurnstileChallenge } from './TurnstileChallenge';
 
@@ -43,7 +43,11 @@ export function GuestLoginPage() {
     } catch (error: unknown) {
       setStatus('idle');
       const requestedChallenge = getGuestLoginChallenge(error);
-      if (requestedChallenge) setChallenge(requestedChallenge);
+      if (isGuestLoginRateLimited(error)) {
+        setChallenge(null);
+      } else if (requestedChallenge) {
+        setChallenge(requestedChallenge);
+      }
       notify(getGuestLoginError(error));
     } finally {
       setTurnstileToken(null);

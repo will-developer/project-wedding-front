@@ -14,6 +14,10 @@ export interface GuestLoginChallenge {
   action: string;
 }
 
+export function isGuestLoginRateLimited(error: unknown): boolean {
+  return isAxiosError(error) && error.response?.status === 429;
+}
+
 export function getGuestLoginChallenge(error: unknown): GuestLoginChallenge | null {
   if (!isAxiosError(error)) return null;
   const data: unknown = error.response?.data;
@@ -32,6 +36,8 @@ export function getGuestLoginError(error: unknown): string {
   if (!error.response) {
     return 'Não foi possível conectar. Verifique sua conexão e tente novamente.';
   }
+
+  if (error.response.status === 429) return messages.TOO_MANY_ATTEMPTS;
 
   const data: unknown = error.response.data;
   if (typeof data === 'object' && data !== null && 'code' in data && typeof data.code === 'string') {
