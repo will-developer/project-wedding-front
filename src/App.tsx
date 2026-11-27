@@ -1,9 +1,9 @@
 import { GuestAccessExperience } from './features/session/GuestAccessExperience';
-import { AdminLoginPage } from './features/admin/AdminLoginPage';
+import { AdminAccessExperience } from './features/admin/AdminAccessExperience';
 
 function App() {
   if (window.location.pathname.replace(/\/+$/, '') === '/admin') {
-    return <AdminLoginPage />;
+    return <AdminAccessExperience />;
   }
 
   return <GuestAccessExperience />;

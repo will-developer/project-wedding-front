@@ -6,7 +6,7 @@ import { loginAdmin } from './adminSession.api';
 import { getAdminLoginError } from './adminLoginError';
 import styles from './AdminLoginPage.module.css';
 
-export function AdminLoginPage() {
+export function AdminLoginPage({ onAuthenticated }: { onAuthenticated: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<'idle' | 'pending' | 'authenticated'>('idle');
   const [notification, setNotification] = useState<{ id: number; message: string } | null>(null);
@@ -33,6 +33,7 @@ export function AdminLoginPage() {
       form.reset();
       setShowPassword(false);
       setStatus('authenticated');
+      onAuthenticated();
     } catch (error: unknown) {
       setStatus('idle');
       setNotification({ id: ++notificationId.current, message: getAdminLoginError(error) });
