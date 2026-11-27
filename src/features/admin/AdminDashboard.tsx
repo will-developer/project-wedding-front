@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { isAxiosError } from 'axios';
-import { ArrowUpRight, CalendarDays, Flower2, LogOut, MapPin, Pencil, Users } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Flower2, Gift, LogOut, MapPin, Pencil, Users } from 'lucide-react';
 import { Toast } from '../../components/ui/Toast';
 import { createEvent, getAdminEvents, updateEvent } from '../event/event.api';
 import type { EventRequest, EventResponse } from '../event/event.types';
 import { EventForm } from '../event/EventForm';
 import { InviteGroups } from '../invite-groups/InviteGroups';
+import { Gifts } from '../gifts/Gifts';
 import styles from './AdminDashboard.module.css';
 
 interface AdminDashboardProps {
@@ -33,6 +34,7 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
   const [formMode, setFormMode] = useState<'create' | 'edit' | null>(null);
   const [saving, setSaving] = useState(false);
   const [savingGroup, setSavingGroup] = useState(false);
+  const [savingGift, setSavingGift] = useState(false);
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const savePending = useRef(false);
 
@@ -100,10 +102,11 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
           <a href="#evento"><CalendarDays size={18} aria-hidden="true" />Seu evento</a>
           {event && <a href="#locais"><MapPin size={18} aria-hidden="true" />Locais</a>}
           {event && !formMode && <a href="#convidados"><Users size={18} aria-hidden="true" />Convidados</a>}
+          {event && !formMode && <a href="#presentes"><Gift size={18} aria-hidden="true" />Presentes</a>}
         </nav>
         <div className={styles.account}>
           <span className={styles.identity}>{login}</span>
-          <button type="button" onClick={onLogout} disabled={signingOut || saving || savingGroup} className={styles.logout}>
+          <button type="button" onClick={onLogout} disabled={signingOut || saving || savingGroup || savingGift} className={styles.logout}>
             <LogOut size={17} aria-hidden="true" />{signingOut ? 'Saindo…' : 'Sair'}
           </button>
         </div>
@@ -112,7 +115,7 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
       <main id="admin-main" className={styles.main}>
         <header className={styles.heading}>
           <div><p>Painel administrativo</p><h1>{formMode === 'create' ? 'Criar evento' : formMode === 'edit' ? 'Editar evento' : 'Seu evento'}</h1></div>
-          {event && !formMode && <button type="button" className={styles.edit} disabled={savingGroup} onClick={() => { setConfirmation(null); setNotification(null); setFormMode('edit'); }}><Pencil size={16} aria-hidden="true" />Editar evento</button>}
+          {event && !formMode && <button type="button" className={styles.edit} disabled={savingGroup || savingGift} onClick={() => { setConfirmation(null); setNotification(null); setFormMode('edit'); }}><Pencil size={16} aria-hidden="true" />Editar evento</button>}
         </header>
         {eventState.status === 'loading' && <p className={styles.state} role="status">Carregando seu evento…</p>}
         {eventState.status === 'error' && (
@@ -152,6 +155,7 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
               </div>
             </section>
             <InviteGroups key={event.id} eventId={event.id} onError={setNotification} onAccessDenied={onAccessDenied} onSavingChange={setSavingGroup} />
+            <Gifts key={`gifts-${event.id}`} eventId={event.id} onError={setNotification} onAccessDenied={onAccessDenied} onSavingChange={setSavingGift} />
           </>
         )}
       </main>

@@ -1,0 +1,32 @@
+.section { margin-block-start: 3rem; scroll-margin-block-start: 1.5rem; }
+.heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-block-end: 1.5rem; }
+.heading h2, .form h3, .empty h3, .gift h3 { margin: 0; font-family: var(--font-display); font-weight: 400; line-height: 1.15; overflow-wrap: anywhere; }
+.heading h2, .form h3 { font-size: 2rem; }
+.heading p, .empty p { color: #666; font-size: 0.9375rem; line-height: 1.6; }
+.heading p { max-inline-size: 45ch; margin: 0.5rem 0 0; }
+.primary, .secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-block-size: 2.875rem; padding: 0.75rem 1.125rem; border: 1px solid #d4d4d4; border-radius: 999px; background: #fff; color: #171717; font-size: 0.875rem; }
+.primary { background: #000; color: #fff; border-color: #000; }
+.section button:disabled { opacity: 0.6; }
+.form { margin-block: 1.5rem; padding: 1.5rem; border: 1px solid #dedede; border-radius: 1.25rem; background: #fff; }
+.form h3 { margin-block-end: 1.5rem; }
+.form h3:focus { outline: none; }
+.fields { display: grid; min-inline-size: 0; gap: 1.25rem; margin: 0; padding: 0; border: 0; }
+.field { display: grid; min-inline-size: 0; gap: 0.5rem; font-size: 0.875rem; line-height: 1.5; }
+.field small { color: #666; font-size: 0.8125rem; }
+.field input, .field textarea { inline-size: 100%; min-inline-size: 0; min-block-size: 3rem; padding: 0.75rem 1rem; border: 1px solid #d4d4d4; border-radius: 0.75rem; background: #fff; color: #171717; font-family: var(--font-body); font-size: 1rem; line-height: 1.5; }
+.field textarea { resize: vertical; }
+.columns { display: grid; min-inline-size: 0; gap: 1.25rem; }
+.actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 0.75rem; margin-block-start: 2rem; }
+.empty { padding-block: 2rem; }
+.empty h3 { margin-block-start: 1rem; font-size: 1.75rem; }
+.list { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.gift { display: grid; grid-template-columns: 4rem minmax(0, 1fr); align-items: start; gap: 1rem; padding: 1.25rem; border: 1px solid #dedede; border-radius: 1.25rem; background: #fff; }
+.image { display: grid; place-items: center; inline-size: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 0.75rem; background: #f3f3f3; color: #666; }
+.image img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+.details { min-inline-size: 0; }
+.gift h3 { font-size: 1.75rem; }
+.description { margin: 0.75rem 0; color: #666; font-size: 0.875rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.price { display: block; margin-block-start: 0.75rem; font-size: 1.0625rem; font-weight: 400; }
+.availability { margin: 0.5rem 0 0; color: #666; font-size: 0.8125rem; line-height: 1.6; }
+.hidden { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (min-width: 48rem) { .form { padding: 2rem; } .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); } .gift { grid-template-columns: 6rem minmax(0, 1fr); padding: 1.5rem; gap: 1.5rem; } }
