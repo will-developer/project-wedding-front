@@ -48,6 +48,10 @@
   object-fit: contain;
 }
 
+.title:focus {
+  outline: none;
+}
+
 .crest {
   flex: none;
   inline-size: 54.23%;
