@@ -1,0 +1,77 @@
+.page {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  block-size: 100svh;
+  overflow: clip;
+  background: var(--color-paper);
+  color: var(--color-paper-ink);
+}
+
+.paper {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: max(100%, 56.25svh);
+  max-inline-size: none;
+  block-size: 100%;
+  object-fit: fill;
+  transform: translateX(-50%);
+  filter: saturate(0.95) brightness(0.967);
+  pointer-events: none;
+}
+
+.hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  block-size: 100%;
+  padding: 1.5rem;
+}
+
+.line {
+  grid-area: 1 / 1;
+  inline-size: 100%;
+  max-inline-size: 40rem;
+  margin: 0;
+  padding-block: 110px;
+  visibility: hidden;
+  font-family: var(--font-script);
+  font-size: clamp(2.55rem, 12vw, 4.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.letter {
+  display: inline-block;
+  opacity: 0;
+}
+
+@media (max-height: 38.75rem) {
+  .line {
+    padding-block: 70px;
+    font-size: 2.55rem;
+  }
+}
+
+@media (max-height: 26.875rem) {
+  .line {
+    padding-block: 40px;
+    font-size: 2.25rem;
+  }
+}

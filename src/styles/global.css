@@ -1,0 +1,59 @@
+@import './fonts.css';
+@import './tokens.css';
+
+:root {
+  font-family: var(--font-body);
+  font-size: 100%;
+  font-synthesis: none;
+  line-height: 1.5;
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+#root {
+  min-block-size: 100svh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+video {
+  display: block;
+  max-inline-size: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 4px;
+}

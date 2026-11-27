@@ -1,0 +1,47 @@
+.media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.8);
+  pointer-events: none;
+}
+
+.video {
+  opacity: 0;
+}
+
+.visible {
+  opacity: 1;
+}
+
+.control {
+  position: absolute;
+  z-index: 1;
+  inset-inline-end: max(1rem, env(safe-area-inset-right));
+  inset-block-end: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-foreground);
+}
+
+.control svg {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 80%));
+}
+

@@ -1,0 +1,252 @@
+.cover {
+  position: relative;
+  isolation: isolate;
+  block-size: 100svh;
+  overflow: clip;
+  background: var(--color-paper);
+  color: #685b49;
+  touch-action: none;
+  user-select: none;
+  perspective: max(650px, 93.75svh);
+  perspective-origin: 50% 50%;
+}
+
+.hiddenTitle {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scene {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: max(100%, 56.25svh);
+  transform: translateX(-50%);
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.paper {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: fill;
+  filter: saturate(0.95) brightness(0.967);
+}
+
+.flap {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 52%;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transition: transform 450ms cubic-bezier(.22,1,.36,1);
+}
+
+.left {
+  inset-inline-start: 0;
+  z-index: 4;
+  transform-origin: 0 50%;
+  transform: rotateY(calc(-1 * var(--peel-angle, 0deg)));
+}
+
+.right {
+  inset-inline-end: 0;
+  z-index: 3;
+  transform-origin: 100% 50%;
+}
+
+.art {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: fill;
+  filter: drop-shadow(1px 1px 2px #48351b38) saturate(0.95) brightness(0.967);
+  backface-visibility: hidden;
+}
+
+.right .art {
+  transform: scaleX(-1);
+  filter: drop-shadow(-1px 1px 2px #48351b35) saturate(0.95) brightness(0.96);
+}
+
+.seal {
+  position: absolute;
+  inset-inline-start: 98%;
+  inset-block-start: 50%;
+  inline-size: min(75%, 39svw, 44svh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) translateZ(8px) rotate(-8deg);
+  filter: drop-shadow(1px 3px 2px #50371f66);
+  backface-visibility: hidden;
+}
+
+.seal img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.monogram {
+  position: absolute;
+  inset-inline-start: 47.5%;
+  inset-block-start: 51.5%;
+  inline-size: 38%;
+  block-size: 27.5%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(125deg, #ad7c34, #81561e 65%, #b08542);
+  mask: url('../../assets/guest-access/seal-monogram.svg') center / 100.1% 100.1% no-repeat;
+  filter: drop-shadow(0.25px 0 0 #96682c) drop-shadow(0.5px 0.7px 0 #ffe2a0);
+}
+
+.open,
+.skip {
+  position: absolute;
+  z-index: 5;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.open {
+  inset-inline-start: 50%;
+  inset-block-end: max(1.75rem, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  min-block-size: 5.75rem;
+  padding: 0.625rem 1.125rem;
+  transform: translateX(-50%);
+  font-size: var(--font-size-hint);
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #fffdf5;
+}
+
+.gesture {
+  display: grid;
+  justify-items: center;
+  animation: swipeIndicator 3s ease-in-out infinite;
+}
+
+.label {
+  overflow: hidden;
+  padding-block: 0.1875rem;
+}
+
+.label > span {
+  display: block;
+  animation: swipeCopy 3s cubic-bezier(.22,1,.36,1) infinite;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse at -10% 48%, #76532c99, #8e6a4566 30%, transparent 72%),
+    linear-gradient(100deg, #73533135, transparent 65%);
+}
+
+.innerFold {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 1px 1.5px #71583b26);
+}
+
+.topFold {
+  inset-block-start: 0;
+  block-size: 44%;
+  transform-origin: 50% 0;
+}
+
+.bottomFold {
+  inset-block-end: 0;
+  block-size: 47%;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 -1px 1.5px #71583b26);
+}
+
+.innerPaper {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-paper);
+  background-position: center top;
+  background-size: 100% 227.2727%;
+  background-repeat: no-repeat;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: saturate(0.95) brightness(0.967);
+}
+
+.bottomFold .innerPaper {
+  background-position: center bottom;
+  background-size: 100% 212.766%;
+  clip-path: polygon(0 100%, 100% 100%, 50% 0);
+}
+
+.opening .skip {
+  visibility: hidden;
+}
+
+.dragging .flap,
+.opening .flap {
+  transition: none;
+}
+
+.opening .gesture,
+.opening .label > span {
+  animation-play-state: paused;
+}
+
+@keyframes swipeIndicator {
+  0%, 10% { opacity: 0; transform: translateY(10px); }
+  25% { opacity: 1; transform: translateY(10px); }
+  65% { opacity: 1; transform: translateY(-8px); }
+  85%, 100% { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes swipeCopy {
+  0%, 8% { opacity: 0; transform: translateY(110%); }
+  28%, 65% { opacity: 1; transform: translateY(0); }
+  90%, 100% { opacity: 0; transform: translateY(-110%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gesture,
+  .label > span {
+    animation: none;
+  }
+
+  .flap {
+    transition: none;
+  }
+}
+
+.skip {
+  inset-inline-start: max(1rem, env(safe-area-inset-left));
+  inset-block-end: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0.75rem;
+}
+
+.open:focus-visible,
+.skip:focus-visible {
+  outline-color: #806b44;
+}
+
+@media (max-height: 38.75rem) {
+  .open {
+    inset-block-end: 1.125rem;
+    min-block-size: 5.125rem;
+    padding-block: 0.4375rem;
+  }
+}

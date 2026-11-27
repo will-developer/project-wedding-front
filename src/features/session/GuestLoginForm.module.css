@@ -1,0 +1,125 @@
+.form {
+  flex: none;
+  inline-size: 100%;
+  min-inline-size: 0;
+  transform: translateY(-0.3125rem);
+}
+
+.hiddenLabel {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.verification:focus {
+  outline: none;
+}
+
+.codeInput {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 3.4375rem;
+  padding: 0.625rem;
+  border: 0;
+  border-block-end: 1px solid var(--color-foreground);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-foreground);
+  -webkit-text-fill-color: var(--color-foreground);
+  font-size: var(--font-size-code);
+  line-height: 1.2;
+  letter-spacing: 0.26em;
+  text-align: center;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 72%);
+  opacity: 1;
+}
+
+.codeInput::placeholder {
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: 1.6875rem;
+  letter-spacing: 0.02em;
+  opacity: 1;
+}
+
+.hint {
+  margin: 0.625rem 0 var(--space-4);
+  font-size: var(--font-size-hint);
+  line-height: 1.4;
+  text-align: center;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 72%);
+}
+
+.continueButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  inline-size: 100%;
+  min-block-size: 2.875rem;
+  padding: 0.625rem var(--space-3);
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 16%);
+  color: var(--color-foreground);
+  font-size: var(--font-size-control);
+  line-height: 1.4;
+  text-align: start;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 65%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 20%), 0 4px 16px rgb(4 23 28 / 10%);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  opacity: 1;
+}
+
+.continueButton svg {
+  flex: none;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.codeInput:focus,
+.codeInput:focus-visible {
+  outline: none;
+  box-shadow: 0 1px 0 var(--color-foreground);
+}
+
+.codeInput[aria-invalid='true'] {
+  border-block-end-color: #f4c2ac;
+}
+
+.codeInput[aria-invalid='true']:focus {
+  box-shadow: 0 1px 0 #f4c2ac;
+}
+
+.continueButton:enabled:hover {
+  background: rgb(255 255 255 / 24%);
+  border-color: rgb(255 255 255 / 40%);
+}
+
+.continueButton:enabled:active {
+  background: rgb(255 255 255 / 30%);
+}
+
+.continueButton:disabled {
+  cursor: default;
+}
+
+@media (max-height: 38.75rem) {
+  .codeInput {
+    block-size: 3rem;
+  }
+
+  .hint {
+    margin-block-end: var(--space-3);
+  }
+}
