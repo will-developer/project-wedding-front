@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import styles from './GuestLoginForm.module.css';
+import { getInvitationCodeFromHash, normalizeInvitationCode } from './invitationCode';
 
 interface GuestLoginFormProps {
   onSubmit: (code: string) => void;
@@ -12,7 +13,7 @@ interface GuestLoginFormProps {
 }
 
 export function GuestLoginForm({ onSubmit, onValidationError, pending, authenticated, verificationRequired = false, children }: GuestLoginFormProps) {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(() => getInvitationCodeFromHash(window.location.hash));
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const verificationRef = useRef<HTMLDivElement>(null);
@@ -20,6 +21,15 @@ export function GuestLoginForm({ onSubmit, onValidationError, pending, authentic
   const inputId = useId();
   const hintId = `${inputId}-hint`;
   const errorId = `${inputId}-error`;
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.hash.slice(1));
+    if (!params.has('code')) return;
+    params.delete('code');
+    url.hash = params.toString();
+    window.history.replaceState(window.history.state, '', url);
+  }, []);
 
   useEffect(() => {
     if (verificationRequired) {
@@ -33,9 +43,9 @@ export function GuestLoginForm({ onSubmit, onValidationError, pending, authentic
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending || authenticated || verificationRequired) return;
-    const trimmedCode = code.trim();
+    const normalizedCode = normalizeInvitationCode(code);
 
-    if (!/^[a-z0-9]{6}$/i.test(trimmedCode)) {
+    if (normalizedCode === null) {
       const message = 'Código inválido. Verifique as 6 letras ou números no seu convite físico.';
       setError(message);
       onValidationError(message);
@@ -43,7 +53,6 @@ export function GuestLoginForm({ onSubmit, onValidationError, pending, authentic
       return;
     }
 
-    const normalizedCode = trimmedCode.toUpperCase();
     setCode(normalizedCode);
     setError(null);
     onValidationError(null);
