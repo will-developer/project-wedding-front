@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { isAxiosError } from 'axios';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Search, Users, X } from 'lucide-react';
 import { InviteGroupForm } from './InviteGroupForm';
+import { InviteCode } from './InviteCode';
+import { filterInviteGroups } from './filterInviteGroups';
 import { createInviteGroup, getInviteGroups } from './inviteGroups.api';
 import type { CreateInviteGroupRequest, InviteGroupResponse } from './inviteGroups.types';
 import styles from './InviteGroups.module.css';
@@ -22,6 +24,8 @@ export function InviteGroups({ eventId, onError, onAccessDenied, onSavingChange 
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [created, setCreated] = useState(false);
+  const [query, setQuery] = useState('');
+  const searchInput = useRef<HTMLInputElement>(null);
   const pending = useRef(false);
 
   useEffect(() => {
@@ -49,6 +53,7 @@ export function InviteGroups({ eventId, onError, onAccessDenied, onSavingChange 
       setState((current) => current.status === 'loaded' ? { status: 'loaded', groups: [...current.groups, group].sort((a, b) => a.groupName.localeCompare(b.groupName, 'pt-BR')) } : current);
       setCreating(false);
       setCreated(true);
+      setQuery('');
     } catch (error: unknown) {
       const status = isAxiosError(error) ? error.response?.status : undefined;
       if (status === 401) onAccessDenied(401);
@@ -63,6 +68,13 @@ export function InviteGroups({ eventId, onError, onAccessDenied, onSavingChange 
     }
   }
 
+  const visibleGroups = state.status === 'loaded' ? filterInviteGroups(state.groups, query) : [];
+
+  function clearSearch() {
+    setQuery('');
+    searchInput.current?.focus();
+  }
+
   return (
     <section id="convidados" className={styles.section} aria-labelledby="groups-heading">
       <header className={styles.heading}>
@@ -73,9 +85,19 @@ export function InviteGroups({ eventId, onError, onAccessDenied, onSavingChange 
       {state.status === 'loading' && <p role="status">Carregando convidados…</p>}
       {state.status === 'error' && <div><p>Os grupos não estão disponíveis agora.</p><button type="button" className={styles.secondary} onClick={() => { onError(''); setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Tentar novamente</button></div>}
       {creating && <InviteGroupForm pending={saving} onSubmit={save} onError={onError} onCancel={() => { setCreating(false); onError(''); }} />}
+      {state.status === 'loaded' && state.groups.length > 0 && <div className={styles.searchArea}>
+        <label htmlFor="groups-search">Buscar convidados</label>
+        <div className={styles.search}>
+          <Search size={18} aria-hidden="true" />
+          <input ref={searchInput} id="groups-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Grupo, pessoa ou código" />
+          {query && <button className={styles.clearSearch} type="button" onClick={clearSearch} aria-label="Limpar busca"><X size={17} aria-hidden="true" /></button>}
+        </div>
+        <p className={styles.resultCount} role="status">{visibleGroups.length} de {state.groups.length} {state.groups.length === 1 ? 'grupo' : 'grupos'}</p>
+      </div>}
       {state.status === 'loaded' && !state.groups.length && !creating && <div className={styles.empty}><Users size={28} strokeWidth={1.25} aria-hidden="true" /><h3>Sua lista começa aqui</h3><p>Crie um grupo para uma família, um casal ou uma pessoa.</p></div>}
-      {state.status === 'loaded' && state.groups.length > 0 && <ul className={styles.list}>{state.groups.map((group) => <li className={styles.group} key={group.id}>
-        <div className={styles.groupHeading}><h3>{group.groupName}</h3><div className={styles.code}><span>Código do convite</span><code>{group.inviteCode}</code></div></div>
+      {state.status === 'loaded' && state.groups.length > 0 && !visibleGroups.length && <div className={styles.empty}><h3>Nenhum grupo encontrado</h3><p>Tente outro nome ou código de convite.</p><button type="button" className={styles.secondary} onClick={clearSearch}>Limpar busca</button></div>}
+      {visibleGroups.length > 0 && <ul className={styles.list}>{visibleGroups.map((group) => <li className={styles.group} key={group.id}>
+        <div className={styles.groupHeading}><h3>{group.groupName}</h3><InviteCode code={group.inviteCode} groupName={group.groupName} onError={onError} /></div>
         {group.notes && <p className={styles.notes}>{group.notes}</p>}
         <ul className={styles.people}>{group.guests.map((guest) => <li key={guest.id}><span>{guest.name}{guest.isChild && <small> · Criança</small>}</span><span className={styles.status}>{statusLabels[guest.rsvpStatus] ?? 'Não informado'}</span></li>)}</ul>
       </li>)}</ul>}
