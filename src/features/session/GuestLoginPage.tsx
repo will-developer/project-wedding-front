@@ -1,4 +1,3 @@
-import beachPoster from '../../assets/guest-access/beach-poster.jpg';
 import saveTheDate from '../../assets/guest-access/save-the-date.svg';
 import weddingCrest from '../../assets/guest-access/wedding-crest.svg';
 import styles from './GuestLoginPage.module.css';
@@ -7,6 +6,7 @@ import { loginGuest } from './session.api';
 import { getGuestLoginChallenge, getGuestLoginError, isGuestLoginRateLimited } from './guestLoginError';
 import type { GuestLoginChallenge } from './guestLoginError';
 import { TurnstileChallenge } from './TurnstileChallenge';
+import { GuestAccessBackground } from './GuestAccessBackground';
 
 interface Notification {
   id: number;
@@ -58,7 +58,7 @@ export function GuestLoginPage() {
 
   return (
     <main className={styles.page} aria-labelledby="guest-access-title">
-      <img className={styles.backdrop} src={beachPoster} alt="" fetchPriority="high" />
+      <GuestAccessBackground />
 
       <div className={styles.content}>
         <h1 className={styles.title} id="guest-access-title">

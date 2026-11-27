@@ -6,17 +6,6 @@
   background-color: var(--color-background);
 }
 
-.backdrop {
-  position: absolute;
-  z-index: -2;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: saturate(0.8);
-}
-
 .page::before {
   position: absolute;
   z-index: -1;
