@@ -13,7 +13,7 @@ interface Notification {
   message: string;
 }
 
-export function GuestLoginPage() {
+export function GuestLoginPage({ active = true }: { active?: boolean }) {
   const [notification, setNotification] = useState<Notification | null>(null);
   const notificationId = useRef(0);
   const [status, setStatus] = useState<'idle' | 'pending' | 'authenticated'>('idle');
@@ -24,8 +24,8 @@ export function GuestLoginPage() {
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    titleRef.current?.focus({ preventScroll: true });
-  }, []);
+    if (active) titleRef.current?.focus({ preventScroll: true });
+  }, [active]);
 
   const notify = useCallback((message: string) => {
     setNotification({ id: ++notificationId.current, message });

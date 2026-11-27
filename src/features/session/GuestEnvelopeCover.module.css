@@ -7,6 +7,8 @@
   color: #685b49;
   touch-action: none;
   user-select: none;
+  perspective: max(650px, 93.75svh);
+  perspective-origin: 50% 50%;
 }
 
 .hiddenTitle {
@@ -25,6 +27,7 @@
   inline-size: max(100%, 56.25svh);
   transform: translateX(-50%);
   pointer-events: none;
+  transform-style: preserve-3d;
 }
 
 .paper {
@@ -40,16 +43,22 @@
   position: absolute;
   inset-block: 0;
   inline-size: 52%;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transition: transform 450ms cubic-bezier(.22,1,.36,1);
 }
 
 .left {
   inset-inline-start: 0;
-  z-index: 2;
+  z-index: 4;
+  transform-origin: 0 50%;
+  transform: rotateY(calc(-1 * var(--peel-angle, 0deg)));
 }
 
 .right {
   inset-inline-end: 0;
-  z-index: 1;
+  z-index: 3;
+  transform-origin: 100% 50%;
 }
 
 .art {
@@ -57,6 +66,7 @@
   block-size: 100%;
   object-fit: fill;
   filter: drop-shadow(1px 1px 2px #48351b38) saturate(0.95) brightness(0.967);
+  backface-visibility: hidden;
 }
 
 .right .art {
@@ -70,8 +80,9 @@
   inset-block-start: 50%;
   inline-size: min(75%, 39svw, 44svh);
   aspect-ratio: 1;
-  transform: translate(-50%, -50%) rotate(-8deg);
+  transform: translate(-50%, -50%) translateZ(8px) rotate(-8deg);
   filter: drop-shadow(1px 3px 2px #50371f66);
+  backface-visibility: hidden;
 }
 
 .seal img {
@@ -95,7 +106,7 @@
 .open,
 .skip {
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   border: 0;
   background: transparent;
   color: inherit;
@@ -119,6 +130,102 @@
 .gesture {
   display: grid;
   justify-items: center;
+  animation: swipeIndicator 3s ease-in-out infinite;
+}
+
+.label {
+  overflow: hidden;
+  padding-block: 0.1875rem;
+}
+
+.label > span {
+  display: block;
+  animation: swipeCopy 3s cubic-bezier(.22,1,.36,1) infinite;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse at -10% 48%, #76532c99, #8e6a4566 30%, transparent 72%),
+    linear-gradient(100deg, #73533135, transparent 65%);
+}
+
+.innerFold {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 1px 1.5px #71583b26);
+}
+
+.topFold {
+  inset-block-start: 0;
+  block-size: 44%;
+  transform-origin: 50% 0;
+}
+
+.bottomFold {
+  inset-block-end: 0;
+  block-size: 47%;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 -1px 1.5px #71583b26);
+}
+
+.innerPaper {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-paper);
+  background-position: center top;
+  background-size: 100% 227.2727%;
+  background-repeat: no-repeat;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: saturate(0.95) brightness(0.967);
+}
+
+.bottomFold .innerPaper {
+  background-position: center bottom;
+  background-size: 100% 212.766%;
+  clip-path: polygon(0 100%, 100% 100%, 50% 0);
+}
+
+.opening .skip {
+  visibility: hidden;
+}
+
+.dragging .flap,
+.opening .flap {
+  transition: none;
+}
+
+.opening .gesture,
+.opening .label > span {
+  animation-play-state: paused;
+}
+
+@keyframes swipeIndicator {
+  0%, 10% { opacity: 0; transform: translateY(10px); }
+  25% { opacity: 1; transform: translateY(10px); }
+  65% { opacity: 1; transform: translateY(-8px); }
+  85%, 100% { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes swipeCopy {
+  0%, 8% { opacity: 0; transform: translateY(110%); }
+  28%, 65% { opacity: 1; transform: translateY(0); }
+  90%, 100% { opacity: 0; transform: translateY(-110%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gesture,
+  .label > span {
+    animation: none;
+  }
+
+  .flap {
+    transition: none;
+  }
 }
 
 .skip {

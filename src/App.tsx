@@ -1,11 +1,7 @@
-import { useState } from 'react';
-import { GuestEnvelopeCover } from './features/session/GuestEnvelopeCover';
-import { GuestLoginPage } from './features/session/GuestLoginPage';
+import { GuestAccessExperience } from './features/session/GuestAccessExperience';
 
 function App() {
-  const [opened, setOpened] = useState(false);
-
-  return opened ? <GuestLoginPage /> : <GuestEnvelopeCover onOpen={() => setOpened(true)} />;
+  return <GuestAccessExperience />;
 }
 
 export default App;

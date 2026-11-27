@@ -1,0 +1,5 @@
+.experience {
+  position: relative;
+  isolation: isolate;
+  min-block-size: 100svh;
+}
