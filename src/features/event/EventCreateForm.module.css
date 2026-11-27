@@ -1,0 +1,23 @@
+.form { padding: 1.5rem; border: 1px solid #dedede; border-radius: 1.25rem; background: #fff; scroll-margin-block-start: 1rem; }
+.formTitle { margin: 0 0 2rem; font-family: var(--font-display); font-weight: 400; font-size: 2.25rem; line-height: 1.1; }
+.formTitle:focus { outline: none; }
+.fields { display: grid; min-inline-size: 0; gap: 1.25rem; margin: 0; padding: 0; border: 0; }
+.fields + .fields { margin-block-start: 2rem; padding-block-start: 0.75rem; border-block-start: 1px solid #e5e5e5; }
+.fields legend { padding: 0 0.75rem 0.75rem 0; font-family: var(--font-display); font-size: 1.75rem; }
+.field { display: grid; gap: 0.5rem; min-inline-size: 0; }
+.field label { font-size: 0.875rem; line-height: 1.5; }
+.field input { inline-size: 100%; min-inline-size: 0; min-block-size: 3rem; padding: 0.75rem 1rem; border: 1px solid #d4d4d4; border-radius: 0.75rem; background: #fff; color: #171717; font-family: var(--font-body); font-size: 1rem; line-height: 1.5; }
+.field input:focus-visible { outline: 2px solid #171717; outline-offset: 2px; }
+.columns { display: grid; min-inline-size: 0; gap: 1.25rem; }
+.checkbox { display: flex; align-items: center; gap: 0.75rem; min-block-size: 2.75rem; font-size: 0.9375rem; line-height: 1.5; }
+.checkbox input { flex: none; inline-size: 1.25rem; block-size: 1.25rem; margin: 0; accent-color: #000; }
+.actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 0.75rem; margin-block-start: 2rem; }
+.actions button { min-block-size: 2.875rem; padding: 0.75rem 1.25rem; border: 1px solid #d4d4d4; border-radius: 999px; font-size: 0.875rem; }
+.cancel { background: #fff; color: #171717; }
+.actions .save { border-color: #000; background: #000; color: #fff; }
+.actions button:disabled, .fields:disabled { opacity: 0.6; }
+.hidden { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (min-width: 48rem) {
+  .form { padding: 2.5rem; }
+  .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

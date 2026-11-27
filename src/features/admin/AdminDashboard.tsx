@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { ArrowUpRight, CalendarDays, Flower2, LogOut, MapPin } from 'lucide-react';
 import { Toast } from '../../components/ui/Toast';
-import { getAdminEvents } from '../event/event.api';
-import type { EventResponse } from '../event/event.types';
+import { createEvent, getAdminEvents } from '../event/event.api';
+import type { CreateEventRequest, EventResponse } from '../event/event.types';
+import { EventCreateForm } from '../event/EventCreateForm';
 import styles from './AdminDashboard.module.css';
 
 interface AdminDashboardProps {
@@ -27,6 +28,34 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
   const [eventState, setEventState] = useState<EventState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
+
+  const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [created, setCreated] = useState(false);
+  const createPending = useRef(false);
+
+  async function handleCreate(request: CreateEventRequest, receptionAtCeremonyLocation: boolean) {
+    if (createPending.current) return;
+    createPending.current = true;
+    setSaving(true);
+    setNotification(null);
+    try {
+      const event = await createEvent(request, receptionAtCeremonyLocation);
+      setEventState({ status: 'loaded', event });
+      setCreating(false);
+      setCreated(true);
+    } catch (error: unknown) {
+      const status = isAxiosError(error) ? error.response?.status : undefined;
+      if (status === 401) onAccessDenied(401);
+      else if (status === 403) setNotification('Não foi possível validar o cadastro. Recarregue a página e tente novamente.');
+      else if (status === 400) setNotification('Confira os campos do evento e os dados da recepção.');
+      else if (status === 409) setNotification('Já existe um evento cadastrado. Recarregue a página para conferir.');
+      else setNotification('Não foi possível confirmar o cadastro. Recarregue a página para verificar se o evento foi criado antes de tentar novamente.');
+    } finally {
+      createPending.current = false;
+      setSaving(false);
+    }
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,7 +95,7 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
         </nav>
         <div className={styles.account}>
           <span className={styles.identity}>{login}</span>
-          <button type="button" onClick={onLogout} disabled={signingOut} className={styles.logout}>
+          <button type="button" onClick={onLogout} disabled={signingOut || saving} className={styles.logout}>
             <LogOut size={17} aria-hidden="true" />{signingOut ? 'Saindo…' : 'Sair'}
           </button>
         </div>
@@ -75,17 +104,20 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
       <main id="admin-main" className={styles.main}>
         <header className={styles.heading}>
           <p>Painel administrativo</p>
-          <h1>Seu evento</h1>
+          <h1>{creating ? 'Criar evento' : 'Seu evento'}</h1>
         </header>
         {eventState.status === 'loading' && <p className={styles.state} role="status">Carregando seu evento…</p>}
         {eventState.status === 'error' && (
           <div className={styles.state}><p>Os dados do evento não estão disponíveis agora.</p><button className={styles.retry} onClick={retry} type="button">Tentar novamente</button></div>
         )}
-        {eventState.status === 'loaded' && !event && (
+        {created && <p role="status">Evento criado.</p>}
+        {creating && <EventCreateForm pending={saving} onSubmit={handleCreate} onCancel={() => { setCreating(false); setNotification(null); }} onError={setNotification} />}
+        {eventState.status === 'loaded' && !event && !creating && (
           <section id="evento" className={styles.empty}>
             <CalendarDays size={32} strokeWidth={1.25} aria-hidden="true" />
             <h2>Nenhum evento cadastrado</h2>
-            <p>Quando um evento for cadastrado, os dados aparecerão aqui.</p>
+            <p>Cadastre a data e os locais para começar a organizar seu evento.</p>
+            <button type="button" className={styles.retry} onClick={() => { setNotification(null); setCreating(true); }}>Criar evento</button>
           </section>
         )}
         {event && (
