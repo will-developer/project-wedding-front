@@ -4,7 +4,9 @@ import weddingCrest from '../../assets/guest-access/wedding-crest.svg';
 import styles from './GuestLoginPage.module.css';
 import { GuestLoginForm } from './GuestLoginForm';
 import { loginGuest } from './session.api';
-import { getGuestLoginError } from './guestLoginError';
+import { getGuestLoginChallenge, getGuestLoginError } from './guestLoginError';
+import type { GuestLoginChallenge } from './guestLoginError';
+import { TurnstileChallenge } from './TurnstileChallenge';
 
 interface Notification {
   id: number;
@@ -16,24 +18,36 @@ export function GuestLoginPage() {
   const notificationId = useRef(0);
   const [status, setStatus] = useState<'idle' | 'pending' | 'authenticated'>('idle');
   const submitting = useRef(false);
+  const [challenge, setChallenge] = useState<GuestLoginChallenge | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [challengeAttempt, setChallengeAttempt] = useState(0);
 
-  function notify(message: string) {
+  const notify = useCallback((message: string) => {
     setNotification({ id: ++notificationId.current, message });
-  }
+  }, []);
 
   async function handleLogin(code: string) {
     if (submitting.current || status === 'authenticated') return;
+    if (challenge && !turnstileToken) {
+      notify('Conclua a verificação de segurança para continuar.');
+      return;
+    }
     submitting.current = true;
     setStatus('pending');
 
     try {
-      await loginGuest(code);
+      await loginGuest(code, turnstileToken ?? undefined);
       setStatus('authenticated');
+      setChallenge(null);
       setNotification(null);
     } catch (error: unknown) {
       setStatus('idle');
+      const requestedChallenge = getGuestLoginChallenge(error);
+      if (requestedChallenge) setChallenge(requestedChallenge);
       notify(getGuestLoginError(error));
     } finally {
+      setTurnstileToken(null);
+      setChallengeAttempt((value) => value + 1);
       submitting.current = false;
     }
   }
@@ -51,6 +65,7 @@ export function GuestLoginPage() {
           onSubmit={handleLogin}
           pending={status === 'pending'}
           authenticated={status === 'authenticated'}
+          verificationRequired={challenge !== null && turnstileToken === null}
           onValidationError={(message) => {
             if (message) {
               notify(message);
@@ -58,7 +73,17 @@ export function GuestLoginPage() {
               setNotification(null);
             }
           }}
-        />
+        >
+          {challenge && status !== 'pending' && (
+            <TurnstileChallenge
+              key={challengeAttempt}
+              siteKey={challenge.siteKey}
+              action={challenge.action}
+              onToken={setTurnstileToken}
+              onError={notify}
+            />
+          )}
+        </GuestLoginForm>
 
         <img
           className={styles.crest}
@@ -78,5 +103,5 @@ export function GuestLoginPage() {
     </main>
   );
 }
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Toast } from '../../components/ui/Toast';

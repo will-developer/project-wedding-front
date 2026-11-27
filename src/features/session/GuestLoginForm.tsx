@@ -1,5 +1,5 @@
-import { useId, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import styles from './GuestLoginForm.module.css';
 
 interface GuestLoginFormProps {
@@ -7,19 +7,32 @@ interface GuestLoginFormProps {
   onValidationError: (message: string | null) => void;
   pending: boolean;
   authenticated: boolean;
+  verificationRequired?: boolean;
+  children?: ReactNode;
 }
 
-export function GuestLoginForm({ onSubmit, onValidationError, pending, authenticated }: GuestLoginFormProps) {
+export function GuestLoginForm({ onSubmit, onValidationError, pending, authenticated, verificationRequired = false, children }: GuestLoginFormProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const verificationRef = useRef<HTMLDivElement>(null);
+  const previousVerificationRequired = useRef(verificationRequired);
   const inputId = useId();
   const hintId = `${inputId}-hint`;
   const errorId = `${inputId}-error`;
 
+  useEffect(() => {
+    if (verificationRequired) {
+      verificationRef.current?.focus({ preventScroll: true });
+    } else if (previousVerificationRequired.current && !pending) {
+      inputRef.current?.focus({ preventScroll: true });
+    }
+    previousVerificationRequired.current = verificationRequired;
+  }, [verificationRequired, pending]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || authenticated) return;
+    if (pending || authenticated || verificationRequired) return;
     const trimmedCode = code.trim();
 
     if (!/^[a-z0-9]{6}$/i.test(trimmedCode)) {
@@ -39,45 +52,56 @@ export function GuestLoginForm({ onSubmit, onValidationError, pending, authentic
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} aria-busy={pending} noValidate>
-      <label className={styles.hiddenLabel} htmlFor={inputId}>
-        Código do convite
-      </label>
-      <input
-        ref={inputRef}
-        className={styles.codeInput}
-        id={inputId}
-        name="code"
-        type="text"
-        value={code}
-        readOnly={pending || authenticated}
-        onChange={(event) => {
-          setCode(event.target.value);
-          setError(null);
-          onValidationError(null);
-        }}
-        placeholder="Seu código"
-        autoComplete="off"
-        autoCapitalize="characters"
-        spellCheck={false}
-        enterKeyHint="go"
-        aria-describedby={error ? `${hintId} ${errorId}` : hintId}
-        aria-invalid={error ? true : undefined}
-        required
-      />
-      <p className={styles.hint} id={hintId}>
-        As 6 letras ou números que estão no seu convite.
-      </p>
-      {error && (
-        <p className={styles.hiddenLabel} id={errorId}>
-          {error}
+      <div hidden={verificationRequired}>
+        <label className={styles.hiddenLabel} htmlFor={inputId}>
+          Código do convite
+        </label>
+        <input
+          ref={inputRef}
+          className={styles.codeInput}
+          id={inputId}
+          name="code"
+          type="text"
+          value={code}
+          readOnly={pending || authenticated}
+          onChange={(event) => {
+            setCode(event.target.value);
+            setError(null);
+            onValidationError(null);
+          }}
+          placeholder="Seu código"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          enterKeyHint="go"
+          aria-describedby={error ? `${hintId} ${errorId}` : hintId}
+          aria-invalid={error ? true : undefined}
+          required
+        />
+        <p className={styles.hint} id={hintId}>
+          As 6 letras ou números que estão no seu convite.
         </p>
-      )}
-      <button className={styles.continueButton} type="submit" disabled={pending || authenticated}>
-        {pending ? 'Acessando convite…' : authenticated ? 'Acesso liberado' : 'Confirmar presença'}
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M5 12h14m-5-5 5 5-5 5" />
-        </svg>
-      </button>
+        {error && (
+          <p className={styles.hiddenLabel} id={errorId}>
+            {error}
+          </p>
+        )}
+        <button className={styles.continueButton} type="submit" disabled={pending || authenticated || verificationRequired}>
+          {pending ? 'Acessando convite…' : authenticated ? 'Acesso liberado' : 'Confirmar presença'}
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M5 12h14m-5-5 5 5-5 5" />
+          </svg>
+        </button>
+      </div>
+      <div
+        ref={verificationRef}
+        className={styles.verification}
+        hidden={!verificationRequired}
+        tabIndex={-1}
+        aria-label="Conclua a verificação de segurança"
+      >
+        {children}
+      </div>
     </form>
   );
 }
