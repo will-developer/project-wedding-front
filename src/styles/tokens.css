@@ -1,0 +1,24 @@
+:root {
+  --font-body: 'DM Sans';
+  --font-display: 'Cormorant Garamond';
+  --font-script: 'Sloop Script';
+
+  --font-size-body: 1rem;
+  --font-size-control: 0.9375rem;
+  --font-size-hint: 0.75rem;
+  --font-size-code: 1.625rem;
+
+  --color-background: #122c32;
+  --color-foreground: #fff;
+  --color-paper: #eee7da;
+  --color-paper-ink: #59432c;
+  --color-focus: #aee9e5;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+
+  --content-width: 22.5rem;
+  --radius-pill: 999px;
+}
