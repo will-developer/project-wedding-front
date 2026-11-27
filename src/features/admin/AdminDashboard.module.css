@@ -74,7 +74,7 @@
   padding: 2rem 1.25rem max(3rem, env(safe-area-inset-bottom));
 }
 
-.heading { margin-block-end: 1.75rem; }
+.heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem; margin-block-end: 1.75rem; }
 .heading p { margin: 0 0 0.5rem; color: #666; font-size: 0.875rem; }
 .heading h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(2.75rem, 5vw, 3.75rem); line-height: 1; }
 
@@ -126,3 +126,5 @@
   .identity { display: block; overflow-wrap: anywhere; font-size: 0.8125rem; color: #bfbfbf; padding-inline: 0.5rem; }
   .logout { justify-content: start; border-color: transparent; }
 }
+
+.edit { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-block-size: 2.75rem; padding: 0.75rem 1.125rem; border: 1px solid #d4d4d4; border-radius: 999px; background: #fff; color: #171717; font-size: 0.875rem; }

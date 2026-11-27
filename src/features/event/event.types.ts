@@ -10,7 +10,7 @@ export interface EventResponse {
   createdAt: string;
 }
 
-export interface CreateEventRequest {
+export interface EventRequest {
   title: string;
   eventDate: string;
   ceremonyLocation: string;

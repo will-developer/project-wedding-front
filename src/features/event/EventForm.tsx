@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, HTMLInputTypeAttribute } from 'react';
-import type { CreateEventRequest } from './event.types';
-import { toEventInstant } from './eventDateTime';
+import type { EventRequest, EventResponse } from './event.types';
+import { toEventDateTime, toEventInstant } from './eventDateTime';
 import { getMapLinkError } from './mapLinkValidation';
-import styles from './EventCreateForm.module.css';
+import styles from './EventForm.module.css';
 
-interface EventCreateFormProps {
+interface EventFormProps {
+  event?: EventResponse;
   pending: boolean;
-  onSubmit: (request: CreateEventRequest, receptionAtCeremonyLocation: boolean) => void;
+  onSubmit: (request: EventRequest, receptionAtCeremonyLocation: boolean) => void;
   onCancel: () => void;
   onError: (message: string) => void;
 }
@@ -41,18 +42,19 @@ function EventField({ name, label, value, onChange, type = 'text', maxLength }: 
   );
 }
 
-export function EventCreateForm({ pending, onSubmit, onCancel, onError }: EventCreateFormProps) {
+export function EventForm({ event, pending, onSubmit, onCancel, onError }: EventFormProps) {
+  const initialDateTime = event ? toEventDateTime(event.eventDate) : '';
   const [draft, setDraft] = useState({
-    title: '',
-    eventDate: '',
-    eventTime: '',
-    ceremonyLocation: '',
-    ceremonyMapsUrl: '',
-    receptionLocation: '',
-    receptionMapsUrl: '',
-    rsvpDeadline: '',
+    title: event?.title ?? '',
+    eventDate: initialDateTime.slice(0, 10),
+    eventTime: initialDateTime.slice(11, 16),
+    ceremonyLocation: event?.ceremonyLocation ?? '',
+    ceremonyMapsUrl: event?.ceremonyMapsUrl ?? '',
+    receptionLocation: event?.receptionLocation ?? '',
+    receptionMapsUrl: event?.receptionMapsUrl ?? '',
+    rsvpDeadline: event?.rsvpDeadline ?? '',
   });
-  const [sameLocation, setSameLocation] = useState(true);
+  const [sameLocation, setSameLocation] = useState(!event || (event.receptionLocation === null && event.receptionMapsUrl === null));
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => { titleRef.current?.focus({ preventScroll: true }); }, []);
@@ -82,7 +84,9 @@ export function EventCreateForm({ pending, onSubmit, onCancel, onError }: EventC
     try {
       onSubmit({
         title: draft.title.trim(),
-        eventDate: toEventInstant(`${draft.eventDate}T${draft.eventTime}`),
+        eventDate: event && `${draft.eventDate}T${draft.eventTime}` === initialDateTime.slice(0, 16)
+          ? event.eventDate
+          : toEventInstant(`${draft.eventDate}T${draft.eventTime}`),
         ceremonyLocation: draft.ceremonyLocation.trim(),
         ceremonyMapsUrl: draft.ceremonyMapsUrl.trim(),
         receptionLocation: sameLocation ? null : draft.receptionLocation.trim(),
@@ -126,7 +130,7 @@ export function EventCreateForm({ pending, onSubmit, onCancel, onError }: EventC
       </fieldset>
       <div className={styles.actions}>
         <button type="button" className={styles.cancel} onClick={onCancel} disabled={pending}>Cancelar</button>
-        <button type="submit" className={styles.save} disabled={pending}>{pending ? 'Criando…' : 'Criar evento'}</button>
+        <button type="submit" className={styles.save} disabled={pending}>{pending ? (event ? 'Salvando…' : 'Criando…') : (event ? 'Salvar alterações' : 'Criar evento')}</button>
       </div>
     </form>
   );

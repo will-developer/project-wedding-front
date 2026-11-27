@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { isAxiosError } from 'axios';
-import { ArrowUpRight, CalendarDays, Flower2, LogOut, MapPin } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Flower2, LogOut, MapPin, Pencil } from 'lucide-react';
 import { Toast } from '../../components/ui/Toast';
-import { createEvent, getAdminEvents } from '../event/event.api';
-import type { CreateEventRequest, EventResponse } from '../event/event.types';
-import { EventCreateForm } from '../event/EventCreateForm';
+import { createEvent, getAdminEvents, updateEvent } from '../event/event.api';
+import type { EventRequest, EventResponse } from '../event/event.types';
+import { EventForm } from '../event/EventForm';
 import styles from './AdminDashboard.module.css';
 
 interface AdminDashboardProps {
@@ -29,30 +29,35 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
   const [attempt, setAttempt] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
 
-  const [creating, setCreating] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit' | null>(null);
   const [saving, setSaving] = useState(false);
-  const [created, setCreated] = useState(false);
-  const createPending = useRef(false);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
+  const savePending = useRef(false);
 
-  async function handleCreate(request: CreateEventRequest, receptionAtCeremonyLocation: boolean) {
-    if (createPending.current) return;
-    createPending.current = true;
+  async function handleSave(request: EventRequest, receptionAtCeremonyLocation: boolean) {
+    if (savePending.current || !formMode) return;
+    const current = eventState.status === 'loaded' ? eventState.event : null;
+    if (formMode === 'edit' && !current) return;
+    savePending.current = true;
     setSaving(true);
     setNotification(null);
     try {
-      const event = await createEvent(request, receptionAtCeremonyLocation);
+      const event = formMode === 'edit' && current
+        ? await updateEvent(current.id, request, receptionAtCeremonyLocation)
+        : await createEvent(request, receptionAtCeremonyLocation);
       setEventState({ status: 'loaded', event });
-      setCreating(false);
-      setCreated(true);
+      setFormMode(null);
+      setConfirmation(formMode === 'edit' ? 'Alterações salvas.' : 'Evento criado.');
     } catch (error: unknown) {
       const status = isAxiosError(error) ? error.response?.status : undefined;
       if (status === 401) onAccessDenied(401);
-      else if (status === 403) setNotification('Não foi possível validar o cadastro. Recarregue a página e tente novamente.');
+      else if (status === 403) setNotification('Não foi possível validar o salvamento. Recarregue a página e tente novamente.');
       else if (status === 400) setNotification('Confira os campos do evento e os dados da recepção.');
+      else if (status === 404) setNotification('O evento não foi encontrado. Recarregue a página para conferir os dados atuais.');
       else if (status === 409) setNotification('Já existe um evento cadastrado. Recarregue a página para conferir.');
-      else setNotification('Não foi possível confirmar o cadastro. Recarregue a página para verificar se o evento foi criado antes de tentar novamente.');
+      else setNotification('Não foi possível confirmar o salvamento. Recarregue a página para verificar os dados antes de tentar novamente.');
     } finally {
-      createPending.current = false;
+      savePending.current = false;
       setSaving(false);
     }
   }
@@ -103,24 +108,24 @@ export function AdminDashboard({ login, signingOut, onLogout, onAccessDenied }: 
 
       <main id="admin-main" className={styles.main}>
         <header className={styles.heading}>
-          <p>Painel administrativo</p>
-          <h1>{creating ? 'Criar evento' : 'Seu evento'}</h1>
+          <div><p>Painel administrativo</p><h1>{formMode === 'create' ? 'Criar evento' : formMode === 'edit' ? 'Editar evento' : 'Seu evento'}</h1></div>
+          {event && !formMode && <button type="button" className={styles.edit} onClick={() => { setConfirmation(null); setNotification(null); setFormMode('edit'); }}><Pencil size={16} aria-hidden="true" />Editar evento</button>}
         </header>
         {eventState.status === 'loading' && <p className={styles.state} role="status">Carregando seu evento…</p>}
         {eventState.status === 'error' && (
           <div className={styles.state}><p>Os dados do evento não estão disponíveis agora.</p><button className={styles.retry} onClick={retry} type="button">Tentar novamente</button></div>
         )}
-        {created && <p role="status">Evento criado.</p>}
-        {creating && <EventCreateForm pending={saving} onSubmit={handleCreate} onCancel={() => { setCreating(false); setNotification(null); }} onError={setNotification} />}
-        {eventState.status === 'loaded' && !event && !creating && (
+        {confirmation && <p role="status">{confirmation}</p>}
+        {formMode && <EventForm event={formMode === 'edit' ? event ?? undefined : undefined} pending={saving} onSubmit={handleSave} onCancel={() => { setFormMode(null); setNotification(null); }} onError={setNotification} />}
+        {eventState.status === 'loaded' && !event && !formMode && (
           <section id="evento" className={styles.empty}>
             <CalendarDays size={32} strokeWidth={1.25} aria-hidden="true" />
             <h2>Nenhum evento cadastrado</h2>
             <p>Cadastre a data e os locais para começar a organizar seu evento.</p>
-            <button type="button" className={styles.retry} onClick={() => { setNotification(null); setCreating(true); }}>Criar evento</button>
+            <button type="button" className={styles.retry} onClick={() => { setNotification(null); setConfirmation(null); setFormMode('create'); }}>Criar evento</button>
           </section>
         )}
-        {event && (
+        {event && !formMode && (
           <>
             <section id="evento" className={styles.event} aria-labelledby="event-title">
               <p className={styles.caption}>O grande dia</p>
