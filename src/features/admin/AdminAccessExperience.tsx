@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { Toast } from '../../components/ui/Toast';
 import { AdminLoginPage } from './AdminLoginPage';
+import { AdminDashboard } from './AdminDashboard';
 import { getAdminSession, logoutAdmin } from './adminSession.api';
 import type { AdminSessionResponse } from './adminSession.api';
 import styles from './AdminAccessExperience.module.css';
@@ -19,6 +20,10 @@ export function AdminAccessExperience() {
   const [notification, setNotification] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const logoutPending = useRef(false);
+  const handleAccessDenied = useCallback((status: 401 | 403) => {
+    setNotification(null);
+    setAccess({ status: status === 401 ? 'anonymous' : 'forbidden' });
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -73,19 +78,20 @@ export function AdminAccessExperience() {
     return <AdminLoginPage onAuthenticated={refreshSession} />;
   }
 
+  if (access.status === 'authenticated') {
+    return (
+      <>
+        <AdminDashboard login={access.session.login} signingOut={signingOut} onLogout={handleLogout} onAccessDenied={handleAccessDenied} />
+        {notification && <Toast message={notification} onDismiss={() => setNotification(null)} />}
+      </>
+    );
+  }
+
   return (
     <main className={styles.page} aria-labelledby="admin-panel-title">
       <div className={styles.panel}>
         <h1 id="admin-panel-title" className={styles.title}>Painel admin</h1>
         {access.status === 'checking' && <p role="status">Verificando seu acesso…</p>}
-        {access.status === 'authenticated' && (
-          <>
-            <p>Conectado como <strong>{access.session.login}</strong>.</p>
-            <button type="button" className={styles.action} disabled={signingOut} onClick={handleLogout}>
-              {signingOut ? 'Saindo…' : 'Sair'}
-            </button>
-          </>
-        )}
         {access.status === 'error' && (
           <button type="button" className={styles.action} onClick={refreshSession}>Tentar novamente</button>
         )}
