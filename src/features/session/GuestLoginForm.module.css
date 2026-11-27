@@ -97,13 +97,17 @@
   box-shadow: 0 1px 0 #f4c2ac;
 }
 
-.continueButton:hover {
+.continueButton:enabled:hover {
   background: rgb(255 255 255 / 24%);
   border-color: rgb(255 255 255 / 40%);
 }
 
-.continueButton:active {
+.continueButton:enabled:active {
   background: rgb(255 255 255 / 30%);
+}
+
+.continueButton:disabled {
+  cursor: default;
 }
 
 @media (max-height: 38.75rem) {

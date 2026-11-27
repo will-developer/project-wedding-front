@@ -3,19 +3,39 @@ import saveTheDate from '../../assets/guest-access/save-the-date.svg';
 import weddingCrest from '../../assets/guest-access/wedding-crest.svg';
 import styles from './GuestLoginPage.module.css';
 import { GuestLoginForm } from './GuestLoginForm';
+import { loginGuest } from './session.api';
+import { getGuestLoginError } from './guestLoginError';
 
 interface Notification {
   id: number;
   message: string;
-  tone: 'error' | 'info';
 }
 
 export function GuestLoginPage() {
   const [notification, setNotification] = useState<Notification | null>(null);
   const notificationId = useRef(0);
+  const [status, setStatus] = useState<'idle' | 'pending' | 'authenticated'>('idle');
+  const submitting = useRef(false);
 
-  function notify(message: string, tone: Notification['tone']) {
-    setNotification({ id: ++notificationId.current, message, tone });
+  function notify(message: string) {
+    setNotification({ id: ++notificationId.current, message });
+  }
+
+  async function handleLogin(code: string) {
+    if (submitting.current || status === 'authenticated') return;
+    submitting.current = true;
+    setStatus('pending');
+
+    try {
+      await loginGuest(code);
+      setStatus('authenticated');
+      setNotification(null);
+    } catch (error: unknown) {
+      setStatus('idle');
+      notify(getGuestLoginError(error));
+    } finally {
+      submitting.current = false;
+    }
   }
 
   return (
@@ -28,10 +48,12 @@ export function GuestLoginPage() {
         </h1>
 
         <GuestLoginForm
-          onSubmit={() => notify('O acesso ao convite estará disponível em breve.', 'info')}
+          onSubmit={handleLogin}
+          pending={status === 'pending'}
+          authenticated={status === 'authenticated'}
           onValidationError={(message) => {
             if (message) {
-              notify(message, 'error');
+              notify(message);
             } else {
               setNotification(null);
             }
@@ -50,7 +72,6 @@ export function GuestLoginPage() {
         <Toast
           key={notification.id}
           message={notification.message}
-          tone={notification.tone}
           onDismiss={() => setNotification(null)}
         />
       )}

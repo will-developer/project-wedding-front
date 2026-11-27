@@ -5,9 +5,11 @@ import styles from './GuestLoginForm.module.css';
 interface GuestLoginFormProps {
   onSubmit: (code: string) => void;
   onValidationError: (message: string | null) => void;
+  pending: boolean;
+  authenticated: boolean;
 }
 
-export function GuestLoginForm({ onSubmit, onValidationError }: GuestLoginFormProps) {
+export function GuestLoginForm({ onSubmit, onValidationError, pending, authenticated }: GuestLoginFormProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -17,6 +19,7 @@ export function GuestLoginForm({ onSubmit, onValidationError }: GuestLoginFormPr
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending || authenticated) return;
     const trimmedCode = code.trim();
 
     if (!/^[a-z0-9]{6}$/i.test(trimmedCode)) {
@@ -35,7 +38,7 @@ export function GuestLoginForm({ onSubmit, onValidationError }: GuestLoginFormPr
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <form className={styles.form} onSubmit={handleSubmit} aria-busy={pending} noValidate>
       <label className={styles.hiddenLabel} htmlFor={inputId}>
         Código do convite
       </label>
@@ -46,6 +49,7 @@ export function GuestLoginForm({ onSubmit, onValidationError }: GuestLoginFormPr
         name="code"
         type="text"
         value={code}
+        readOnly={pending || authenticated}
         onChange={(event) => {
           setCode(event.target.value);
           setError(null);
@@ -68,8 +72,8 @@ export function GuestLoginForm({ onSubmit, onValidationError }: GuestLoginFormPr
           {error}
         </p>
       )}
-      <button className={styles.continueButton} type="submit">
-        Confirmar presença
+      <button className={styles.continueButton} type="submit" disabled={pending || authenticated}>
+        {pending ? 'Acessando convite…' : authenticated ? 'Acesso liberado' : 'Confirmar presença'}
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M5 12h14m-5-5 5 5-5 5" />
         </svg>
