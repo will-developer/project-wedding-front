@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import styles from './GuestLoginForm.module.css';
@@ -97,9 +98,7 @@ export function GuestLoginForm({ onSubmit, onValidationError, pending, authentic
         )}
         <button className={styles.continueButton} type="submit" disabled={pending || authenticated || verificationRequired}>
           {pending ? 'Acessando convite…' : authenticated ? 'Acesso liberado' : 'Confirmar presença'}
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M5 12h14m-5-5 5 5-5 5" />
-          </svg>
+          <ArrowRight aria-hidden="true" focusable="false" />
         </button>
       </div>
       <div

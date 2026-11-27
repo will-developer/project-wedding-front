@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import styles from './Toast.module.css';
 
 interface ToastProps {
@@ -14,9 +15,7 @@ export function Toast({ message, onDismiss }: ToastProps) {
     >
       <p>{message}</p>
       <button type="button" onClick={onDismiss} aria-label="Fechar notificação">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="m6 6 12 12M18 6 6 18" />
-        </svg>
+        <X aria-hidden="true" focusable="false" />
       </button>
     </div>
   );
