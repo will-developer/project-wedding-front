@@ -21,6 +21,11 @@ export function GuestLoginPage() {
   const [challenge, setChallenge] = useState<GuestLoginChallenge | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [challengeAttempt, setChallengeAttempt] = useState(0);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    titleRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const notify = useCallback((message: string) => {
     setNotification({ id: ++notificationId.current, message });
@@ -61,7 +66,7 @@ export function GuestLoginPage() {
       <GuestAccessBackground />
 
       <div className={styles.content}>
-        <h1 className={styles.title} id="guest-access-title">
+        <h1 ref={titleRef} className={styles.title} id="guest-access-title" tabIndex={-1}>
           <img src={saveTheDate} alt="Save the date" width="729" height="446" />
         </h1>
 
@@ -107,5 +112,5 @@ export function GuestLoginPage() {
     </main>
   );
 }
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Toast } from '../../components/ui/Toast';

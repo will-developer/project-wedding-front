@@ -1,0 +1,145 @@
+.cover {
+  position: relative;
+  isolation: isolate;
+  block-size: 100svh;
+  overflow: clip;
+  background: var(--color-paper);
+  color: #685b49;
+  touch-action: none;
+  user-select: none;
+}
+
+.hiddenTitle {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scene {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: max(100%, 56.25svh);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.paper {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: fill;
+  filter: saturate(0.95) brightness(0.967);
+}
+
+.flap {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 52%;
+}
+
+.left {
+  inset-inline-start: 0;
+  z-index: 2;
+}
+
+.right {
+  inset-inline-end: 0;
+  z-index: 1;
+}
+
+.art {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: fill;
+  filter: drop-shadow(1px 1px 2px #48351b38) saturate(0.95) brightness(0.967);
+}
+
+.right .art {
+  transform: scaleX(-1);
+  filter: drop-shadow(-1px 1px 2px #48351b35) saturate(0.95) brightness(0.96);
+}
+
+.seal {
+  position: absolute;
+  inset-inline-start: 98%;
+  inset-block-start: 50%;
+  inline-size: min(75%, 39svw, 44svh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  filter: drop-shadow(1px 3px 2px #50371f66);
+}
+
+.seal img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.monogram {
+  position: absolute;
+  inset-inline-start: 47.5%;
+  inset-block-start: 51.5%;
+  inline-size: 38%;
+  block-size: 27.5%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(125deg, #ad7c34, #81561e 65%, #b08542);
+  mask: url('../../assets/guest-access/seal-monogram.svg') center / 100.1% 100.1% no-repeat;
+  filter: drop-shadow(0.25px 0 0 #96682c) drop-shadow(0.5px 0.7px 0 #ffe2a0);
+}
+
+.open,
+.skip {
+  position: absolute;
+  z-index: 3;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.open {
+  inset-inline-start: 50%;
+  inset-block-end: max(1.75rem, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  min-block-size: 5.75rem;
+  padding: 0.625rem 1.125rem;
+  transform: translateX(-50%);
+  font-size: var(--font-size-hint);
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #fffdf5;
+}
+
+.gesture {
+  display: grid;
+  justify-items: center;
+}
+
+.skip {
+  inset-inline-start: max(1rem, env(safe-area-inset-left));
+  inset-block-end: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0.75rem;
+}
+
+.open:focus-visible,
+.skip:focus-visible {
+  outline-color: #806b44;
+}
+
+@media (max-height: 38.75rem) {
+  .open {
+    inset-block-end: 1.125rem;
+    min-block-size: 5.125rem;
+    padding-block: 0.4375rem;
+  }
+}
