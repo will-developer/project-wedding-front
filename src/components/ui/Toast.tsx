@@ -2,15 +2,14 @@ import styles from './Toast.module.css';
 
 interface ToastProps {
   message: string;
-  tone: 'error' | 'info';
   onDismiss: () => void;
 }
 
-export function Toast({ message, tone, onDismiss }: ToastProps) {
+export function Toast({ message, onDismiss }: ToastProps) {
   return (
     <div
-      className={`${styles.toast} ${tone === 'error' ? styles.error : ''}`}
-      role={tone === 'error' ? 'alert' : 'status'}
+      className={`${styles.toast} ${styles.error}`}
+      role="alert"
       aria-atomic="true"
     >
       <p>{message}</p>
