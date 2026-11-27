@@ -31,6 +31,7 @@ export function Gifts({ eventId, onError, onAccessDenied, onSavingChange }: Gift
   const [form, setForm] = useState<FormState>({ mode: 'closed' });
   const [saving, setSaving] = useState(false);
   const [confirmation, setConfirmation] = useState<string | null>(null);
+  const [activationAnnouncement, setActivationAnnouncement] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const pending = useRef(false);
 
@@ -57,10 +58,17 @@ export function Gifts({ eventId, onError, onAccessDenied, onSavingChange }: Gift
     onError('');
     try {
       const gift = await action();
-      setState((current) => current.status === 'loaded' ? { status: 'loaded', gifts: [...current.gifts.filter((item) => item.id !== gift.id), gift].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')) } : current);
+      setState((current) => {
+        if (current.status !== 'loaded') return current;
+        const exists = current.gifts.some((item) => item.id === gift.id);
+        const gifts = exists ? current.gifts.map((item) => item.id === gift.id ? gift : item) : [...current.gifts, gift];
+        return { status: 'loaded', gifts: giftId ? gifts : gifts.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')) };
+      });
       setForm({ mode: 'closed' });
-      setConfirmation(message);
+      if (giftId) setActivationAnnouncement(message);
+      else setConfirmation(message);
     } catch (error: unknown) {
+      if (giftId) setActivationAnnouncement('Não foi possível atualizar o status do presente.');
       const status = isAxiosError(error) ? error.response?.status : undefined;
       if (status === 401) onAccessDenied(401);
       else if (status === 400) onError('Confira o nome, o preço, a quantidade e o link da imagem do presente.');
@@ -86,6 +94,7 @@ export function Gifts({ eventId, onError, onAccessDenied, onSavingChange }: Gift
         {state.status === 'loaded' && form.mode === 'closed' && <button className={styles.primary} type="button" disabled={saving} onClick={() => { onError(''); setConfirmation(null); setForm({ mode: 'create' }); }}><Plus size={16} aria-hidden="true" />Cadastrar presente</button>}
       </header>
       {confirmation && <p role="status">{confirmation}</p>}
+      <p className={styles.hidden} role="status">{activationAnnouncement}</p>
       {state.status === 'loading' && <p role="status">Carregando presentes…</p>}
       {state.status === 'error' && <div><p>A lista de presentes não está disponível agora.</p><button type="button" className={styles.secondary} onClick={() => { onError(''); setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Tentar novamente</button></div>}
       {form.mode === 'create' && <GiftForm key="create" pending={saving} onSubmit={(request) => void mutate(() => createGift(eventId, request), 'Presente cadastrado.')} onError={onError} onCancel={cancel} />}
@@ -96,7 +105,10 @@ export function Gifts({ eventId, onError, onAccessDenied, onSavingChange }: Gift
         <div className={styles.details}><h3>{gift.name}</h3>{gift.description && <p className={styles.description}>{gift.description}</p>}<strong className={styles.price}>{currency.format(gift.price)}</strong><p className={styles.availability}>{gift.availableQuantity} de {gift.totalQuantity} disponíveis <span className={gift.active ? styles.active : styles.inactive}>· {gift.active ? 'Ativo' : 'Inativo'}</span></p>
           <div className={styles.giftActions}>
             <button type="button" className={styles.secondary} disabled={saving || form.mode !== 'closed'} aria-label={`Editar presente ${gift.name}`} onClick={() => { onError(''); setConfirmation(null); setForm({ mode: 'edit', gift }); }}><Pencil size={15} aria-hidden="true" />Editar</button>
-            <button type="button" className={styles.secondary} disabled={saving || form.mode !== 'closed'} aria-label={`${gift.active ? 'Desativar' : 'Ativar'} presente ${gift.name}`} onClick={() => { setConfirmation(null); void mutate(() => setGiftActive(eventId, gift.id, !gift.active), `${gift.name}: ${gift.active ? 'desativado' : 'ativado'}.`, gift.id); }}>{updatingId === gift.id ? 'Atualizando…' : gift.active ? 'Desativar' : 'Ativar'}</button>
+            <button type="button" className={`${styles.secondary} ${styles.toggleStatus}`} disabled={saving || form.mode !== 'closed'} aria-busy={updatingId === gift.id} aria-label={`${gift.active ? 'Desativar' : 'Ativar'} presente ${gift.name}`} onClick={() => { setActivationAnnouncement('Atualizando o status do presente.'); void mutate(() => setGiftActive(eventId, gift.id, !gift.active), `${gift.name}: ${gift.active ? 'desativado' : 'ativado'}.`, gift.id); }}>
+              <span className={styles.buttonMeasure} aria-hidden="true">Atualizando…</span>
+              <span className={styles.buttonLabel}>{updatingId === gift.id ? 'Atualizando…' : gift.active ? 'Desativar' : 'Ativar'}</span>
+            </button>
           </div>
         </div>
       </li>)}</ul>}
