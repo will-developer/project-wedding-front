@@ -1,8 +1,11 @@
-export interface CreateGiftRequest {
+export interface UpdateGiftRequest {
   name: string;
   description: string | null;
   imageUrl: string | null;
   price: number;
+}
+
+export interface CreateGiftRequest extends UpdateGiftRequest {
   totalQuantity: number;
 }
 

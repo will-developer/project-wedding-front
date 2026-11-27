@@ -1,22 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { NumericFormat } from 'react-number-format';
-import type { CreateGiftRequest } from './gifts.types';
+import type { CreateGiftRequest, GiftResponse, UpdateGiftRequest } from './gifts.types';
 import { getGiftImageError, parseGiftPrice } from './giftValidation';
 import styles from './Gifts.module.css';
 
-interface GiftFormProps {
+interface GiftFormCommonProps {
   pending: boolean;
-  onSubmit: (request: CreateGiftRequest) => void;
   onCancel: () => void;
   onError: (message: string) => void;
 }
 
-export function GiftForm({ pending, onSubmit, onCancel, onError }: GiftFormProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [price, setPrice] = useState('');
+type GiftFormProps = GiftFormCommonProps & (
+  | { gift?: undefined; onSubmit: (request: CreateGiftRequest) => void }
+  | { gift: GiftResponse; onSubmit: (request: UpdateGiftRequest) => void }
+);
+
+export function GiftForm(props: GiftFormProps) {
+  const { gift, pending, onCancel, onError } = props;
+  const [name, setName] = useState(gift?.name ?? '');
+  const [description, setDescription] = useState(gift?.description ?? '');
+  const [imageUrl, setImageUrl] = useState(gift?.imageUrl ?? '');
+  const [price, setPrice] = useState(gift?.price.toString() ?? '');
   const [quantity, setQuantity] = useState('1');
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -36,17 +41,22 @@ export function GiftForm({ pending, onSubmit, onCancel, onError }: GiftFormProps
     if (imageError) { fail('giftImage', imageError); return; }
     const parsedPrice = parseGiftPrice(price);
     if (parsedPrice === null) { fail('giftPrice', 'Informe um preço entre R$ 0,01 e R$ 99.999.999,99, com até duas casas decimais. Ex.: 150,00.'); return; }
-    const parsedQuantity = Number(quantity);
-    if (!/^\d+$/.test(quantity) || !Number.isInteger(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > 2147483647) {
-      fail('giftQuantity', 'Informe uma quantidade inteira entre 1 e 2.147.483.647.');
-      return;
+    const request = { name: name.trim(), description: description.trim() || null, imageUrl: imageUrl.trim() || null, price: parsedPrice };
+    if (props.gift) {
+      props.onSubmit(request);
+    } else {
+      const parsedQuantity = Number(quantity);
+      if (!/^\d+$/.test(quantity) || !Number.isInteger(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > 2147483647) {
+        fail('giftQuantity', 'Informe uma quantidade inteira entre 1 e 2.147.483.647.');
+        return;
+      }
+      props.onSubmit({ ...request, totalQuantity: parsedQuantity });
     }
-    onSubmit({ name: name.trim(), description: description.trim() || null, imageUrl: imageUrl.trim() || null, price: parsedPrice, totalQuantity: parsedQuantity });
   }
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate aria-busy={pending}>
-      <h3 ref={heading} tabIndex={-1}>Novo presente</h3>
+      <h3 ref={heading} tabIndex={-1}>{gift ? 'Editar presente' : 'Novo presente'}</h3>
       <fieldset className={styles.fields} disabled={pending}>
         <legend className={styles.hidden}>Dados do presente</legend>
         <label className={styles.field} htmlFor="gift-name"><span>Nome do presente</span><input id="gift-name" name="giftName" value={name} onChange={(event) => setName(event.target.value)} maxLength={160} required /></label>
@@ -61,10 +71,11 @@ export function GiftForm({ pending, onSubmit, onCancel, onError }: GiftFormProps
             isAllowed={({ floatValue }) => floatValue === undefined || floatValue <= 99999999.99}
             placeholder="150,00" required
           /></label>
-          <label className={styles.field} htmlFor="gift-quantity"><span>Quantidade total</span><input id="gift-quantity" name="giftQuantity" type="number" inputMode="numeric" min={1} max={2147483647} step={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} required /></label>
+          {!gift && <label className={styles.field} htmlFor="gift-quantity"><span>Quantidade total</span><input id="gift-quantity" name="giftQuantity" type="number" inputMode="numeric" min={1} max={2147483647} step={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} required /></label>}
         </div>
+        {gift && <p className={styles.availability}>{gift.availableQuantity} de {gift.totalQuantity} disponíveis</p>}
       </fieldset>
-      <div className={styles.actions}><button type="button" className={styles.secondary} onClick={onCancel} disabled={pending}>Cancelar</button><button type="submit" className={styles.primary} disabled={pending}>{pending ? 'Cadastrando…' : 'Cadastrar presente'}</button></div>
+      <div className={styles.actions}><button type="button" className={styles.secondary} onClick={onCancel} disabled={pending}>Cancelar</button><button type="submit" className={styles.primary} disabled={pending}>{pending ? 'Salvando…' : gift ? 'Salvar alterações' : 'Cadastrar presente'}</button></div>
     </form>
   );
 }
